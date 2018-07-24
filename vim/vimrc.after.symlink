@@ -15,11 +15,29 @@ set expandtab
 
 "Turn off search highlighting with <C-l>"
 nnoremap <C-L> :nohl<CR><C-L>
+nnoremap <leader>w :FixWhitespace<CR>
 
-let NERDTreeIgnore=['\.o$', '\~$', 'node_modules', 'git', 'tmp']
+"Disable nerdtree FocusGained refresh"
+autocmd! AuNERDTreeCmd FocusGained
+
+let NERDTreeIgnore=['\.o$', '\~$', 'git', 'tmp', 'dist']
+
+" Add path to typescript config
+let g:syntastic_typescript_tsc_args="--target ES2016 --experimentalDecorators"
 
 if executable('ag')
   set grepprg=ag\ --nogroup\ --nocolor
   let g:ctrlp_user_command = 'ag %s -l --nocolor -g ""'
   let g:ctrlp_use_caching = 0
 endif
+
+let g:syntastic_javascript_checkers = ['eslint']
+
+function! FindConfig(prefix, what, where)
+  let cfg = findfile(a:what, escape(a:where, ' ') . ';')
+  return cfg !=# '' ? ' ' . a:prefix . ' ' . shellescape(cfg) : ''
+endfunction
+
+autocmd FileType javascript let b:syntastic_javascript_eslint_args =
+    \ get(g:, 'syntastic_javascript_eslint_args', '') .
+    \ FindConfig('-c', '.eslintrc', expand('<afile>:p:h', 1))
